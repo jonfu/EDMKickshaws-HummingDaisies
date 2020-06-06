@@ -45,7 +45,7 @@ ffft library is provided under its own terms -- see ffft.S for specifics.
 #define DIM 2
 #define ROTATEFRAME 16
 //#define rollingThreshold 40 --default
-#define rollingThreshold 42
+#define rollingThreshold 38
 #define ROLLTIME 3000
 #define COLORSWITCH 4
 
@@ -297,14 +297,32 @@ void loop() {
     int16_t sample = analogRead(A0);
     
     //Serial.println(sample);
+
+ 
+/* jon's original design in 2016
   
     capture[samplePos] =
       ((sample > (512-noiseThreshold)) &&
        (sample < (512+noiseThreshold))) ? 0 :
       sample - 512; // Sign-convert for FFT; -512 to +511
 
+*/
+
+    // new design May 2018, idle sample input = 452, make it 3 times more sensitive, x5 ~= 2255
+
+    sample = sample * 5;
+
+    capture[samplePos] = sample - 2255;
+
     samplePos++;
     
+/*
+    if (samplePos == FFT_N) {
+      Serial.println(sample);
+      Serial.println(capture[0]);
+    }
+*/
+
   }
 
   fft_input(capture, bfly_buff);   // Samples -> complex #s
